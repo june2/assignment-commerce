@@ -1,6 +1,7 @@
 package com.commerce.demo.infrastructure.product;
 
 import com.commerce.demo.domain.product.Money;
+import com.commerce.demo.domain.brand.Brand;
 import jakarta.persistence.*;
 import com.commerce.demo.domain.product.Product;
 import lombok.AccessLevel;
@@ -27,6 +28,17 @@ public class ProductJpaEntity {
   private Long brandId;
 
   public Product toDomain() {
-    return new Product(this.id, this.category, this.name, new Money(this.price), null);
+    Brand brand = new Brand(this.brandId, null);
+    return new Product(this.id, this.category, this.name, new Money(this.price), brand);
+  }
+
+  public static ProductJpaEntity from(Product product) {
+    return new ProductJpaEntity(
+        product.getId(),
+        product.getCategory(),
+        product.getName(),
+        product.getPrice().getValue(),
+        product.getBrand().getId()
+    );
   }
 } 

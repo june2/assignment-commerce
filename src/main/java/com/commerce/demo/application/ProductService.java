@@ -53,7 +53,7 @@ public class ProductService {
   }
 
   public void delete(Long id) {
-    if (!productRepository.findById(id).isPresent()) {
+    if (productRepository.findById(id).isEmpty()) {
       throw new ProductNotFoundException(id);
     }
     productRepository.deleteById(id);

@@ -2,7 +2,6 @@ package com.commerce.demo.infrastructure.product;
 
 import com.commerce.demo.domain.product.Product;
 import com.commerce.demo.domain.product.ProductRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -30,10 +29,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
   @Override
   public Product save(Product product) {
-    ProductJpaEntity entity = new ProductJpaEntity(product.getId(), product.getCategory(),
-        product.getName(),
-        product.getPrice().getValue(),
-        product.getBrand() != null ? product.getBrand().getId() : null);
+    ProductJpaEntity entity = ProductJpaEntity.from(product);
     ProductJpaEntity saved = productJpaRepository.save(entity);
     return saved.toDomain();
   }
