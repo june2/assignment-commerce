@@ -19,16 +19,17 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
   @Override
   public List<ProductWithBrand> findLowestPriceProductsByCategory() {
     String sql = """
-       SELECT category, brand_name, price
-        FROM (
-          SELECT p.category, b.name as brand_name, p.price,
-                 ROW_NUMBER() OVER (PARTITION BY p.category ORDER BY p.price ASC) as rn
-          FROM product p
-          INNER JOIN brand b ON p.brand_id = b.id
-        ) ranked
-        WHERE rn = 1
-        ORDER BY price DESC
-        """;
+            WITH ranked_products AS (
+              SELECT p.category, p.brand_id, p.price, b.name as brand_name,
+                     ROW_NUMBER() OVER (PARTITION BY p.category ORDER BY p.price ASC) as rn
+              FROM product p
+              INNER JOIN brand b ON p.brand_id = b.id
+            )
+            SELECT category, brand_name, price
+            FROM ranked_products
+            WHERE rn = 1
+            ORDER BY price DESC
+            """;
 
     Query query = entityManager.createNativeQuery(sql);
     List<Object[]> results = query.getResultList();
@@ -48,20 +49,18 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
   @Override
   public List<ProductWithBrand> findLowestTotalPriceBrandProducts() {
     String sql = """
-        SELECT p.id, p.category, p.name, p.price, b.id as brand_id, b.name as brand_name
+        WITH brand_totals AS (
+          SELECT brand_id, SUM(price) as total_price, COUNT(DISTINCT category) as category_count
+          FROM product
+          GROUP BY brand_id
+          HAVING category_count = (SELECT COUNT(DISTINCT category) FROM product)
+          ORDER BY total_price ASC
+          LIMIT 1
+        )
+        SELECT p.id, p.category, p.name, p.price, p.brand_id, b.name as brand_name
         FROM product p
         INNER JOIN brand b ON p.brand_id = b.id
-        WHERE b.id = (
-            SELECT brand_id
-            FROM (
-                SELECT p2.brand_id, SUM(p2.price) as total_price, COUNT(DISTINCT p2.category) as category_count
-                FROM product p2
-                GROUP BY p2.brand_id
-                HAVING category_count = (SELECT COUNT(DISTINCT category) FROM product)
-                ORDER BY total_price ASC
-                LIMIT 1
-            ) lowest_brand
-        )
+        INNER JOIN brand_totals bt ON p.brand_id = bt.brand_id
         ORDER BY p.category
         """;
 
@@ -83,7 +82,7 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
   @Override
   public List<ProductWithBrand> findLowestPriceProductsInCategory(String category) {
     String sql = """
-        SELECT p.id, p.category, p.name, p.price, b.id as brand_id, b.name as brand_name
+        SELECT p.id, p.category, p.name, p.price, p.brand_id, b.name as brand_name
         FROM product p
         INNER JOIN brand b ON p.brand_id = b.id
         WHERE p.category = :category 
@@ -110,7 +109,7 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
   @Override
   public List<ProductWithBrand> findHighestPriceProductsInCategory(String category) {
     String sql = """
-        SELECT p.id, p.category, p.name, p.price, b.id as brand_id, b.name as brand_name
+        SELECT p.id, p.category, p.name, p.price, p.brand_id, b.name as brand_name
         FROM product p
         INNER JOIN brand b ON p.brand_id = b.id
         WHERE p.category = :category 
