@@ -2,6 +2,7 @@ package com.commerce.demo.application;
 
 import com.commerce.demo.domain.brand.Brand;
 import com.commerce.demo.domain.brand.BrandRepository;
+import com.commerce.demo.domain.exception.BrandNotFoundException;
 import com.commerce.demo.web.dto.BrandResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,8 +52,8 @@ class BrandServiceTest {
   void findByIdNotFound() {
     Mockito.when(brandRepository.findById(1L)).thenReturn(Optional.empty());
     assertThatThrownBy(() -> brandService.findById(1L))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("브랜드 없음");
+            .isInstanceOf(BrandNotFoundException.class)
+            .hasMessage("브랜드(id=1)를 찾을 수 없습니다");
   }
   
   @Test
@@ -70,13 +71,15 @@ class BrandServiceTest {
   void updateNotFound() {
     Mockito.when(brandRepository.findById(1L)).thenReturn(Optional.empty());
     assertThatThrownBy(() -> brandService.update(1L, "Adidas"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("브랜드 없음");
+            .isInstanceOf(BrandNotFoundException.class)
+            .hasMessage("브랜드(id=1)를 찾을 수 없습니다");
   }
   
   @Test
   @DisplayName("브랜드 삭제가 정상 동작한다")
   void delete() {
+    Brand brand = new Brand(1L, "Nike");
+    Mockito.when(brandRepository.findById(1L)).thenReturn(Optional.of(brand));
     Mockito.doNothing().when(brandRepository).deleteById(1L);
     brandService.delete(1L);
     Mockito.verify(brandRepository).deleteById(1L);

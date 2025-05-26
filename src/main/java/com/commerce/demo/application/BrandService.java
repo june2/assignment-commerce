@@ -2,6 +2,7 @@ package com.commerce.demo.application;
 
 import com.commerce.demo.domain.brand.Brand;
 import com.commerce.demo.domain.brand.BrandRepository;
+import com.commerce.demo.domain.exception.BrandNotFoundException;
 import com.commerce.demo.web.dto.BrandResponse;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -30,19 +31,22 @@ public class BrandService {
   
   public BrandResponse findById(Long id) {
     Brand brand = brandRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("브랜드 없음"));
+            .orElseThrow(() -> new BrandNotFoundException(id));
     return BrandResponse.from(brand);
   }
   
   public BrandResponse update(Long id, String name) {
     Brand brand = brandRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("브랜드 없음"));
+            .orElseThrow(() -> new BrandNotFoundException(id));
     Brand updated = new Brand(brand.getId(), name);
     Brand saved = brandRepository.save(updated);
     return BrandResponse.from(saved);
   }
   
   public void delete(Long id) {
+    if (!brandRepository.findById(id).isPresent()) {
+      throw new BrandNotFoundException(id);
+    }
     brandRepository.deleteById(id);
   }
 }

@@ -1,5 +1,6 @@
 package com.commerce.demo.domain.product;
 
+import com.commerce.demo.domain.exception.InvalidValueException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -11,7 +12,7 @@ public class Money {
 
   public Money(long value) {
     if (value < 0) {
-      throw new IllegalArgumentException("음수 불가");
+      throw new InvalidValueException("가격은 음수일 수 없습니다");
     }
     this.value = value;
   }

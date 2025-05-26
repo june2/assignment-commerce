@@ -49,8 +49,8 @@ class ProductApiIntegrationTest {
             new ParameterizedTypeReference<>() {
             }
     );
-    assertThat(invalidBrandResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-
+    assertThat(invalidBrandResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    
     // 2. 상품 생성 - 실패 케이스: 잘못된 가격
     ProductRequest invalidPriceReq = new ProductRequest("티셔츠", "상의", -1000, brandId);
     var invalidPriceEntity = new HttpEntity<>(invalidPriceReq);
@@ -62,7 +62,7 @@ class ProductApiIntegrationTest {
             }
     );
     assertThat(invalidPriceResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-
+    
     // 3. 상품 생성 - 성공 케이스
     ProductRequest createReq = new ProductRequest("티셔츠", "상의", 10000, brandId);
     var createEntity = new HttpEntity<>(createReq);
@@ -112,7 +112,7 @@ class ProductApiIntegrationTest {
     );
     assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
     
-    // 7. 삭제 후 조회시 400 반환
+    // 7. 삭제 후 조회시 404 반환
     ResponseEntity<ProductResponse> getAfterDelete = restTemplate.exchange(
             "/api/v1/products/" + productId,
             HttpMethod.GET,
@@ -120,6 +120,6 @@ class ProductApiIntegrationTest {
             new ParameterizedTypeReference<>() {
             }
     );
-    assertThat(getAfterDelete.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(getAfterDelete.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 } 

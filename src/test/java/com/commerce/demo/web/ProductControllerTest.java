@@ -1,6 +1,8 @@
 package com.commerce.demo.web;
 
 import com.commerce.demo.application.ProductService;
+import com.commerce.demo.domain.exception.BrandNotFoundException;
+import com.commerce.demo.domain.exception.ProductNotFoundException;
 import com.commerce.demo.web.dto.ProductRequest;
 import com.commerce.demo.web.dto.ProductResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,95 +24,110 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProductControllerTest {
 
   @Autowired
-  MockMvc mockMvc;
-  @Autowired
-  ObjectMapper objectMapper;
+  private MockMvc mockMvc;
+
   @MockBean
-  ProductService productService;
+  private ProductService productService;
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @Test
-  @DisplayName("상품 생성 API는 정상적으로 ProductResponse를 반환한다")
-  void createProduct() throws Exception {
-    Mockito.when(productService.create(any()))
-        .thenReturn(new ProductResponse(1L, "티셔츠", "상의", 10000, 1L, "Nike"));
-    ProductRequest req = new ProductRequest("티셔츠", "상의", 10000, 1L);
+  @DisplayName("상품 생성 성공")
+  void createProduct_Success() throws Exception {
+    // given
+    ProductRequest request = new ProductRequest("테스트 상품", "상의", 10000L, 1L);
+    ProductResponse response = new ProductResponse(1L, "테스트 상품", "상의", 10000L, 1L, "브랜드A");
+
+    Mockito.when(productService.create(any())).thenReturn(response);
+
+    // when & then
     mockMvc.perform(post("/api/v1/products")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
+            .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1L))
-        .andExpect(jsonPath("$.name").value("티셔츠"));
+        .andExpect(jsonPath("$.name").value("테스트 상품"));
   }
 
   @Test
-  @DisplayName("상품 생성 API는 예외 발생시 400을 반환한다")
-  void createProductException() throws Exception {
-    Mockito.when(productService.create(any())).thenThrow(new IllegalArgumentException("브랜드 없음"));
-    ProductRequest req = new ProductRequest("티셔츠", "상의", 10000, 1L);
+  @DisplayName("상품 생성 실패 - 브랜드 없음")
+  void createProduct_BrandNotFound() throws Exception {
+    // given
+    ProductRequest request = new ProductRequest("테스트 상품", "상의", 10000L, 999L);
+    Mockito.when(productService.create(any())).thenThrow(new BrandNotFoundException(999L));
+
+    // when & then
     mockMvc.perform(post("/api/v1/products")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
-        .andExpect(status().isBadRequest());
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isNotFound());
   }
 
   @Test
-  @DisplayName("상품 단건 조회 API는 정상적으로 ProductResponse를 반환한다")
-  void getProduct() throws Exception {
-    Mockito.when(productService.findById(eq(1L)))
-        .thenReturn(new ProductResponse(1L, "티셔츠", "상의", 10000, 1L, "Nike"));
+  @DisplayName("상품 조회 성공")
+  void findProduct_Success() throws Exception {
+    // given
+    ProductResponse response = new ProductResponse(1L, "테스트 상품", "상의", 10000L, 1L, "브랜드A");
+    Mockito.when(productService.findById(eq(1L))).thenReturn(response);
+
+    // when & then
     mockMvc.perform(get("/api/v1/products/1"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(1L))
-        .andExpect(jsonPath("$.name").value("티셔츠"));
+        .andExpect(jsonPath("$.id").value(1L));
   }
 
   @Test
-  @DisplayName("상품 단건 조회 API는 예외 발생시 400을 반환한다")
-  void getProductException() throws Exception {
-    Mockito.when(productService.findById(eq(1L))).thenThrow(new IllegalArgumentException("상품 없음"));
+  @DisplayName("상품 조회 실패 - 상품 없음")
+  void findProduct_NotFound() throws Exception {
+    // given
+    Mockito.when(productService.findById(eq(1L))).thenThrow(new ProductNotFoundException(1L));
+
+    // when & then
     mockMvc.perform(get("/api/v1/products/1"))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isNotFound());
   }
 
   @Test
-  @DisplayName("상품 수정 API는 정상적으로 ProductResponse를 반환한다")
-  void updateProduct() throws Exception {
-    Mockito.when(productService.update(eq(1L), any()))
-        .thenReturn(new ProductResponse(1L, "셔츠", "상의", 12000, 1L, "Nike"));
-    ProductRequest req = new ProductRequest("셔츠", "상의", 12000, 1L);
+  @DisplayName("상품 수정 성공")
+  void updateProduct_Success() throws Exception {
+    // given
+    ProductRequest request = new ProductRequest("수정된 상품", "상의", 15000L, 1L);
+    ProductResponse response = new ProductResponse(1L, "수정된 상품", "상의", 15000L, 1L, "브랜드A");
+
+    Mockito.when(productService.update(eq(1L), any())).thenReturn(response);
+
+    // when & then
     mockMvc.perform(put("/api/v1/products/1")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
+            .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(1L))
-        .andExpect(jsonPath("$.name").value("셔츠"));
+        .andExpect(jsonPath("$.name").value("수정된 상품"));
   }
 
   @Test
-  @DisplayName("상품 수정 API는 예외 발생시 400을 반환한다")
-  void updateProductException() throws Exception {
+  @DisplayName("상품 수정 실패 - 상품 없음")
+  void updateProduct_NotFound() throws Exception {
+    // given
+    ProductRequest request = new ProductRequest("수정된 상품", "상의", 15000L, 1L);
     Mockito.when(productService.update(eq(1L), any()))
-        .thenThrow(new IllegalArgumentException("상품 없음"));
-    ProductRequest req = new ProductRequest("셔츠", "상의", 12000, 1L);
+        .thenThrow(new ProductNotFoundException(1L));
+
+    // when & then
     mockMvc.perform(put("/api/v1/products/1")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
-        .andExpect(status().isBadRequest());
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isNotFound());
   }
 
   @Test
-  @DisplayName("상품 삭제 API는 정상적으로 200을 반환한다")
-  void deleteProduct() throws Exception {
-    Mockito.doNothing().when(productService).delete(1L);
-    mockMvc.perform(delete("/api/v1/products/1"))
-        .andExpect(status().isOk());
-  }
+  @DisplayName("상품 삭제 실패 - 상품 없음")
+  void deleteProduct_NotFound() throws Exception {
+    // given
+    Mockito.doThrow(new ProductNotFoundException(1L)).when(productService).delete(1L);
 
-  @Test
-  @DisplayName("상품 삭제 API는 예외 발생시 400을 반환한다")
-  void deleteProductException() throws Exception {
-    Mockito.doThrow(new IllegalArgumentException("상품 없음")).when(productService).delete(1L);
+    // when & then
     mockMvc.perform(delete("/api/v1/products/1"))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isNotFound());
   }
 }

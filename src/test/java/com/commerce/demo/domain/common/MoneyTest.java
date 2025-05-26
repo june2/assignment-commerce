@@ -1,5 +1,6 @@
 package com.commerce.demo.domain.common;
 
+import com.commerce.demo.domain.exception.InvalidValueException;
 import com.commerce.demo.domain.product.Money;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,9 @@ class MoneyTest {
   @Test
   @DisplayName("Money는 음수로 생성할 수 없다")
   void negativeValueThrows() {
-    assertThatThrownBy(() -> new Money(-1)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Money(-1))
+        .isInstanceOf(InvalidValueException.class)
+        .hasMessage("가격은 음수일 수 없습니다");
   }
   
   @Test

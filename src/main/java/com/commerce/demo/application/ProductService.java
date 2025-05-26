@@ -2,6 +2,8 @@ package com.commerce.demo.application;
 
 import com.commerce.demo.domain.brand.Brand;
 import com.commerce.demo.domain.brand.BrandRepository;
+import com.commerce.demo.domain.exception.BrandNotFoundException;
+import com.commerce.demo.domain.exception.ProductNotFoundException;
 import com.commerce.demo.domain.product.Money;
 import com.commerce.demo.domain.product.Product;
 import com.commerce.demo.domain.product.ProductRepository;
@@ -22,7 +24,7 @@ public class ProductService {
 
   public ProductResponse create(ProductRequest request) {
     Brand brand = brandRepository.findById(request.brandId())
-        .orElseThrow(() -> new IllegalArgumentException("브랜드 없음"));
+        .orElseThrow(() -> new BrandNotFoundException(request.brandId()));
     Product product = new Product(null, request.category(), request.name(),
         new Money(request.price()), brand);
     Product saved = productRepository.save(product);
@@ -35,15 +37,15 @@ public class ProductService {
 
   public ProductResponse findById(Long id) {
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("상품 없음"));
+        .orElseThrow(() -> new ProductNotFoundException(id));
     return ProductResponse.from(product);
   }
 
   public ProductResponse update(Long id, ProductRequest request) {
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("상품 없음"));
+        .orElseThrow(() -> new ProductNotFoundException(id));
     Brand brand = brandRepository.findById(request.brandId())
-        .orElseThrow(() -> new IllegalArgumentException("브랜드 없음"));
+        .orElseThrow(() -> new BrandNotFoundException(request.brandId()));
     Product updated = new Product(product.getId(), request.category(), request.name(),
         new Money(request.price()), brand);
     Product saved = productRepository.save(updated);
@@ -51,6 +53,9 @@ public class ProductService {
   }
 
   public void delete(Long id) {
+    if (!productRepository.findById(id).isPresent()) {
+      throw new ProductNotFoundException(id);
+    }
     productRepository.deleteById(id);
   }
 }

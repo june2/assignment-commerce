@@ -2,6 +2,8 @@ package com.commerce.demo.application;
 
 import com.commerce.demo.domain.brand.Brand;
 import com.commerce.demo.domain.brand.BrandRepository;
+import com.commerce.demo.domain.exception.BrandNotFoundException;
+import com.commerce.demo.domain.exception.ProductNotFoundException;
 import com.commerce.demo.domain.product.Product;
 import com.commerce.demo.domain.product.ProductRepository;
 import com.commerce.demo.domain.product.Money;
@@ -88,8 +90,8 @@ class ProductServiceTest {
   void findByIdNotFound() {
     Mockito.when(productRepository.findById(1L)).thenReturn(Optional.empty());
     assertThatThrownBy(() -> productService.findById(1L))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("상품 없음");
+            .isInstanceOf(ProductNotFoundException.class)
+            .hasMessage("상품(id=1)를 찾을 수 없습니다");
   }
   
   @Test
@@ -113,8 +115,8 @@ class ProductServiceTest {
     ProductRequest req = new ProductRequest("셔츠", "상의", 12000, 1L);
     Mockito.when(productRepository.findById(1L)).thenReturn(Optional.empty());
     assertThatThrownBy(() -> productService.update(1L, req))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("상품 없음");
+            .isInstanceOf(ProductNotFoundException.class)
+            .hasMessage("상품(id=1)를 찾을 수 없습니다");
   }
   
   @Test
@@ -125,13 +127,15 @@ class ProductServiceTest {
     Mockito.when(productRepository.findById(1L)).thenReturn(Optional.of(oldProduct));
     Mockito.when(brandRepository.findById(2L)).thenReturn(Optional.empty());
     assertThatThrownBy(() -> productService.update(1L, req))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("브랜드 없음");
+            .isInstanceOf(BrandNotFoundException.class)
+            .hasMessage("브랜드(id=2)를 찾을 수 없습니다");
   }
   
   @Test
   @DisplayName("상품 삭제가 정상 동작한다")
   void delete() {
+    Product product = new Product(1L, "상의", "티셔츠", new Money(10000), brandA);
+    Mockito.when(productRepository.findById(1L)).thenReturn(Optional.of(product));
     Mockito.doNothing().when(productRepository).deleteById(1L);
     productService.delete(1L);
     Mockito.verify(productRepository).deleteById(1L);
