@@ -485,4 +485,223 @@ const BrandLowestPrice = () => {
             </div>
         </div>
     );
+};
+
+// 카테고리별 가격 범위 조회 컴포넌트
+const CategoryPriceRange = () => {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [categories] = useState(['상의', '아우터', '바지', '스니커즈', '가방', '모자', '양말', '액세서리']);
+
+    // 데이터 로드
+    const loadData = async (category) => {
+        if (!category) return;
+        
+        try {
+            setLoading(true);
+            setError(null);
+            const result = await categoryAPI.getCategoryPriceRange(category);
+            setData(result);
+        } catch (err) {
+            setError(err.message);
+            console.error('카테고리별 가격 범위 조회 오류:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 카테고리 선택 핸들러
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+        loadData(category);
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 py-8">
+            <div className="max-w-4xl mx-auto px-4">
+                {/* 헤더 */}
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                                <i className="fas fa-search text-purple-600 mr-3"></i>
+                                카테고리별 가격 범위
+                            </h1>
+                            <p className="text-gray-600">특정 카테고리의 최저가와 최고가 브랜드를 확인하세요</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 카테고리 선택 */}
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-4">카테고리 선택</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {categories.map((category) => (
+                            <button
+                                key={category}
+                                onClick={() => handleCategorySelect(category)}
+                                className={`p-3 rounded-lg border-2 transition-all ${
+                                    selectedCategory === category
+                                        ? 'border-purple-500 bg-purple-50 text-purple-700'
+                                        : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
+                                }`}
+                            >
+                                <i className="fas fa-tag mr-2"></i>
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 로딩 상태 */}
+                {loading && (
+                    <div className="bg-white rounded-lg shadow-md p-8">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                            <p className="text-gray-600">데이터를 불러오는 중...</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* 에러 상태 */}
+                {error && (
+                    <div className="bg-white rounded-lg shadow-md p-8">
+                        <div className="text-center">
+                            <i className="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                            <h2 className="text-xl font-bold text-gray-800 mb-2">오류 발생</h2>
+                            <p className="text-gray-600 mb-4">{error}</p>
+                            <button
+                                onClick={() => loadData(selectedCategory)}
+                                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+                            >
+                                다시 시도
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* 결과 표시 */}
+                {data && !loading && (
+                    <>
+                        {/* 카테고리 정보 */}
+                        <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg shadow-md p-6 text-white mb-6">
+                            <div className="text-center">
+                                <h3 className="text-2xl font-bold mb-2">{data.카테고리}</h3>
+                                <p className="text-purple-100">카테고리별 최저가 및 최고가 브랜드 정보</p>
+                            </div>
+                        </div>
+
+                        {/* 최저가 및 최고가 정보 */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            {/* 최저가 */}
+                            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                                <div className="px-6 py-4 bg-green-50 border-b">
+                                    <h3 className="text-lg font-semibold text-green-800 flex items-center">
+                                        <i className="fas fa-arrow-down mr-2"></i>
+                                        최저가
+                                    </h3>
+                                </div>
+                                <div className="p-6">
+                                    {data.최저가 && data.최저가.map((item, index) => (
+                                        <div key={index} className="flex items-center justify-between p-4 bg-green-50 rounded-lg mb-3 last:mb-0">
+                                            <div className="flex items-center">
+                                                <div className="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+                                                    <span className="text-green-600 font-bold">
+                                                        {item.브랜드.charAt(0)}
+                                                    </span>
+                                                </div>
+                                                <div className="ml-3">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {item.브랜드}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-lg font-bold text-green-600">
+                                                {item.가격}원
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* 최고가 */}
+                            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                                <div className="px-6 py-4 bg-red-50 border-b">
+                                    <h3 className="text-lg font-semibold text-red-800 flex items-center">
+                                        <i className="fas fa-arrow-up mr-2"></i>
+                                        최고가
+                                    </h3>
+                                </div>
+                                <div className="p-6">
+                                    {data.최고가 && data.최고가.map((item, index) => (
+                                        <div key={index} className="flex items-center justify-between p-4 bg-red-50 rounded-lg mb-3 last:mb-0">
+                                            <div className="flex items-center">
+                                                <div className="flex-shrink-0 h-10 w-10 bg-red-100 rounded-full flex items-center justify-center">
+                                                    <span className="text-red-600 font-bold">
+                                                        {item.브랜드.charAt(0)}
+                                                    </span>
+                                                </div>
+                                                <div className="ml-3">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {item.브랜드}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-lg font-bold text-red-600">
+                                                {item.가격}원
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 가격 차이 통계 */}
+                        {data.최저가 && data.최고가 && data.최저가.length > 0 && data.최고가.length > 0 && (
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">가격 차이 분석</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-green-600">
+                                            {data.최저가[0].가격}원
+                                        </div>
+                                        <div className="text-sm text-gray-600 mt-1">최저가</div>
+                                    </div>
+                                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-red-600">
+                                            {data.최고가[0].가격}원
+                                        </div>
+                                        <div className="text-sm text-gray-600 mt-1">최고가</div>
+                                    </div>
+                                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-purple-600">
+                                            {(() => {
+                                                const lowest = parseInt(data.최저가[0].가격.replace(/,/g, ''));
+                                                const highest = parseInt(data.최고가[0].가격.replace(/,/g, ''));
+                                                return new Intl.NumberFormat('ko-KR').format(highest - lowest);
+                                            })()}원
+                                        </div>
+                                        <div className="text-sm text-gray-600 mt-1">가격 차이</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* 초기 상태 */}
+                {!selectedCategory && !loading && (
+                    <div className="bg-white rounded-lg shadow-md p-8">
+                        <div className="text-center">
+                            <i className="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                            <h3 className="text-xl font-bold text-gray-800 mb-2">카테고리를 선택하세요</h3>
+                            <p className="text-gray-600">위에서 카테고리를 선택하면 해당 카테고리의 최저가와 최고가 브랜드 정보를 확인할 수 있습니다.</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 }; 
