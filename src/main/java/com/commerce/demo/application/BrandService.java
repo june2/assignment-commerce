@@ -19,8 +19,9 @@ public class BrandService {
   private final BrandRepository brandRepository;
   
   public BrandResponse create(String name) {
-    Brand brand = brandRepository.save(new Brand(null, name));
-    return BrandResponse.from(brand);
+    Brand brand = Brand.create(name);
+    Brand saved = brandRepository.save(brand);
+    return BrandResponse.from(saved);
   }
   
   public List<BrandResponse> findAll() {
@@ -36,15 +37,16 @@ public class BrandService {
   }
   
   public BrandResponse update(Long id, String name) {
-    Brand brand = brandRepository.findById(id)
+    Brand existingBrand = brandRepository.findById(id)
             .orElseThrow(() -> new BrandNotFoundException(id));
-    Brand updated = new Brand(brand.getId(), name);
-    Brand saved = brandRepository.save(updated);
+    
+    Brand updatedBrand = Brand.of(existingBrand.getId(), name);
+    Brand saved = brandRepository.save(updatedBrand);
     return BrandResponse.from(saved);
   }
   
   public void delete(Long id) {
-    if (!brandRepository.findById(id).isPresent()) {
+    if (brandRepository.findById(id).isEmpty()) {
       throw new BrandNotFoundException(id);
     }
     brandRepository.deleteById(id);

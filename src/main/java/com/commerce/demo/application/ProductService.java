@@ -25,8 +25,14 @@ public class ProductService {
   public ProductResponse create(ProductRequest request) {
     Brand brand = brandRepository.findById(request.brandId())
         .orElseThrow(() -> new BrandNotFoundException(request.brandId()));
-    Product product = new Product(null, request.category(), request.name(),
-        new Money(request.price()), brand);
+    
+    Product product = Product.create(
+        request.category(), 
+        request.name(),
+        new Money(request.price()), 
+        brand
+    );
+    
     Product saved = productRepository.save(product);
     return ProductResponse.from(saved);
   }
@@ -42,13 +48,21 @@ public class ProductService {
   }
 
   public ProductResponse update(Long id, ProductRequest request) {
-    Product product = productRepository.findById(id)
+    Product existingProduct = productRepository.findById(id)
         .orElseThrow(() -> new ProductNotFoundException(id));
+    
     Brand brand = brandRepository.findById(request.brandId())
         .orElseThrow(() -> new BrandNotFoundException(request.brandId()));
-    Product updated = new Product(product.getId(), request.category(), request.name(),
-        new Money(request.price()), brand);
-    Product saved = productRepository.save(updated);
+    
+    Product updatedProduct = Product.of(
+        existingProduct.getId(),
+        request.category(), 
+        request.name(),
+        new Money(request.price()), 
+        brand
+    );
+    
+    Product saved = productRepository.save(updatedProduct);
     return ProductResponse.from(saved);
   }
 
