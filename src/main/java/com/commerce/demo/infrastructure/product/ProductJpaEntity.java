@@ -28,8 +28,8 @@ public class ProductJpaEntity {
   private Long brandId;
 
   public Product toDomain() {
-    Brand brand = new Brand(this.brandId, null);
-    return new Product(this.id, this.category, this.name, new Money(this.price), brand);
+    Brand brand = Brand.reference(this.brandId);
+    return Product.of(this.id, this.category, this.name, new Money(this.price), brand);
   }
 
   public static ProductJpaEntity from(Product product) {

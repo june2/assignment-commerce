@@ -33,7 +33,7 @@ class BrandRepositoryImplTest {
     @DisplayName("브랜드를 저장하고 ID로 조회할 수 있다")
     void saveAndFindById() {
         // given
-        Brand brand = new Brand(null, "Nike");
+        Brand brand = Brand.create("Nike");
 
         // when
         Brand saved = brandRepository.save(brand);
@@ -48,8 +48,8 @@ class BrandRepositoryImplTest {
     @DisplayName("모든 브랜드를 조회할 수 있다")
     void findAll() {
         // given
-        Brand brand1 = new Brand(null, "Nike");
-        Brand brand2 = new Brand(null, "Adidas");
+        Brand brand1 = Brand.create("Nike");
+        Brand brand2 = Brand.create("Adidas");
         
         brandRepository.save(brand1);
         brandRepository.save(brand2);
@@ -67,7 +67,7 @@ class BrandRepositoryImplTest {
     @DisplayName("브랜드를 삭제할 수 있다")
     void deleteById() {
         // given
-        Brand brand = new Brand(null, "Nike");
+        Brand brand = Brand.create("Nike");
         Brand saved = brandRepository.save(brand);
 
         // when

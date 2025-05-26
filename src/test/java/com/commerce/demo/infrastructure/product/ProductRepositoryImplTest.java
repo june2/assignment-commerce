@@ -43,8 +43,8 @@ class ProductRepositoryImplTest {
         BrandJpaEntity brandEntity = new BrandJpaEntity(null, "Nike");
         brandJpaRepository.save(brandEntity);
         
-        Brand brand = new Brand(brandEntity.getId(), "Nike");
-        Product product = new Product(null, "상의", "티셔츠", new Money(10000), brand);
+        Brand brand = Brand.of(brandEntity.getId(), "Nike");
+        Product product = Product.create("상의", "티셔츠", new Money(10000), brand);
         
         // when
         Product saved = productRepository.save(product);
@@ -58,6 +58,7 @@ class ProductRepositoryImplTest {
         assertThat(foundProduct.getPrice().getValue()).isEqualTo(10000);
         assertThat(foundProduct.getBrand()).isNotNull();
         assertThat(foundProduct.getBrand().getId()).isEqualTo(brandEntity.getId());
+        // 브랜드 이름은 repository 레이어에서 로드되지 않으므로 검증하지 않음
     }
 
     @Test
@@ -67,9 +68,9 @@ class ProductRepositoryImplTest {
         BrandJpaEntity brandEntity = new BrandJpaEntity(null, "Nike");
         brandJpaRepository.save(brandEntity);
         
-        Brand brand = new Brand(brandEntity.getId(), "Nike");
-        Product product1 = new Product(null, "상의", "티셔츠", new Money(10000), brand);
-        Product product2 = new Product(null, "하의", "바지", new Money(20000), brand);
+        Brand brand = Brand.of(brandEntity.getId(), "Nike");
+        Product product1 = Product.create("상의", "티셔츠", new Money(10000), brand);
+        Product product2 = Product.create("하의", "바지", new Money(20000), brand);
         
         productRepository.save(product1);
         productRepository.save(product2);
@@ -84,6 +85,7 @@ class ProductRepositoryImplTest {
         assertThat(products).allSatisfy(product -> {
             assertThat(product.getBrand()).isNotNull();
             assertThat(product.getBrand().getId()).isEqualTo(brandEntity.getId());
+            // 브랜드 이름은 repository 레이어에서 로드되지 않으므로 검증하지 않음
         });
     }
 
@@ -94,8 +96,8 @@ class ProductRepositoryImplTest {
         BrandJpaEntity brandEntity = new BrandJpaEntity(null, "Nike");
         brandJpaRepository.save(brandEntity);
         
-        Brand brand = new Brand(brandEntity.getId(), "Nike");
-        Product product = new Product(null, "상의", "티셔츠", new Money(10000), brand);
+        Brand brand = Brand.of(brandEntity.getId(), "Nike");
+        Product product = Product.create("상의", "티셔츠", new Money(10000), brand);
         Product saved = productRepository.save(product);
 
         // when
