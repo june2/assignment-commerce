@@ -1,5 +1,6 @@
 package com.commerce.demo.web.exception;
 
+import com.commerce.demo.application.exception.ApplicationException;
 import com.commerce.demo.domain.exception.DomainException;
 import com.commerce.demo.domain.exception.EntityNotFoundException;
 import com.commerce.demo.domain.exception.InvalidValueException;
@@ -36,6 +37,15 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(DomainException.class)
   public ResponseEntity<ApiResult<Void>> handleDomainException(DomainException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiResult.failure(ex.getMessage()));
+  }
+  
+  /**
+   * 애플리케이션 계층 예외 (400 Bad Request)
+   */
+  @ExceptionHandler(ApplicationException.class)
+  public ResponseEntity<ApiResult<Void>> handleApplicationException(ApplicationException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(ApiResult.failure(ex.getMessage()));
   }

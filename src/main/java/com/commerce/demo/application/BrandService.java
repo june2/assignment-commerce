@@ -4,7 +4,6 @@ import com.commerce.demo.domain.brand.Brand;
 import com.commerce.demo.domain.brand.BrandRepository;
 import com.commerce.demo.domain.exception.BrandNotFoundException;
 import com.commerce.demo.web.dto.BrandResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

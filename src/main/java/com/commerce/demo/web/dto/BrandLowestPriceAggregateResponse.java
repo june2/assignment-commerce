@@ -2,8 +2,6 @@ package com.commerce.demo.web.dto;
 
 import com.commerce.demo.domain.price.ProductWithBrand;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public record BrandLowestPriceAggregateResponse(
     BrandLowestPriceDetail 최저가,

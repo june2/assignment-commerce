@@ -152,7 +152,7 @@ public class PriceAcceptanceTest extends AcceptanceTest {
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when().get("/api/v1/prices/category/존재하지않는카테고리/price-range")
         .then().log().all()
-        .statusCode(500);
+        .statusCode(400);
   }
 
   private void 브랜드별_상품_데이터_셋업() {

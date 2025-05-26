@@ -1,7 +1,9 @@
 package com.commerce.demo.application;
 
+import com.commerce.demo.application.exception.ProductDataNotFoundException;
 import com.commerce.demo.domain.price.ProductPriceCalculator;
 import com.commerce.demo.domain.price.ProductWithBrand;
+import com.commerce.demo.domain.price.ProductWithBrandRepository;
 import com.commerce.demo.domain.price.ProductWithBrandRepository;
 import com.commerce.demo.domain.price.CategorySortService;
 import com.commerce.demo.web.dto.CategoryLowestPriceAggregateResponse;
@@ -44,7 +46,7 @@ public class ProductWithBrandService {
     List<ProductWithBrand> lowestBrandProducts = productWithBrandRepository.findLowestTotalPriceBrandProducts();
 
     if (lowestBrandProducts.isEmpty()) {
-      throw new IllegalStateException("상품 데이터가 존재하지 않습니다.");
+      throw new ProductDataNotFoundException();
     }
 
     // 카테고리 순서에 따라 정렬
@@ -68,7 +70,7 @@ public class ProductWithBrandService {
         category);
 
     if (lowestProducts.isEmpty() || highestProducts.isEmpty()) {
-      throw new IllegalStateException("해당 카테고리의 상품 데이터가 존재하지 않습니다: " + category);
+      throw ProductDataNotFoundException.forCategory(category);
     }
 
     return CategoryPriceRangeResponse.from(category, lowestProducts, highestProducts);
