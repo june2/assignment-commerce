@@ -2,7 +2,7 @@ const { useState } = React;
 
 // 메인 애플리케이션 컴포넌트
 const App = () => {
-    const [currentView, setCurrentView] = useState('brands'); // 'brands', 'products', 'category-lowest'
+    const [currentView, setCurrentView] = useState('brands'); // 'brands', 'products', 'category-lowest', 'brand-lowest'
     const [selectedBrandForProducts, setSelectedBrandForProducts] = useState(null);
 
     // 상품 관리 화면으로 이동
@@ -20,6 +20,12 @@ const App = () => {
     // 카테고리별 최저가격 조회 화면으로 이동
     const handleViewCategoryLowest = () => {
         setCurrentView('category-lowest');
+        setSelectedBrandForProducts(null);
+    };
+
+    // 단일 브랜드 최저가격 조회 화면으로 이동
+    const handleViewBrandLowest = () => {
+        setCurrentView('brand-lowest');
         setSelectedBrandForProducts(null);
     };
 
@@ -50,10 +56,31 @@ const App = () => {
                         <i className="fas fa-chart-line mr-2"></i>
                         카테고리별 최저가격
                     </button>
+                    <button
+                        onClick={handleViewBrandLowest}
+                        className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                            currentView === 'brand-lowest'
+                                ? 'border-green-500 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                    >
+                        <i className="fas fa-crown mr-2"></i>
+                        단일 브랜드 최저가격
+                    </button>
                 </div>
             </div>
         </div>
     );
+
+    // 단일 브랜드 최저가격 조회 화면
+    if (currentView === 'brand-lowest') {
+        return (
+            <div>
+                <Navigation />
+                <BrandLowestPrice />
+            </div>
+        );
+    }
 
     // 카테고리별 최저가격 조회 화면
     if (currentView === 'category-lowest') {

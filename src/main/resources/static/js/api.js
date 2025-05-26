@@ -146,5 +146,12 @@ const categoryAPI = {
         const response = await fetch('/api/v1/prices/lowest-by-category');
         if (!response.ok) throw new Error('카테고리별 최저가격 조회 실패');
         return response.json();
+    },
+
+    // 단일 브랜드로 모든 카테고리 상품 구매 시 최저가격 브랜드 조회
+    getLowestByBrand: async () => {
+        const response = await fetch('/api/v1/prices/lowest-by-brand');
+        if (!response.ok) throw new Error('단일 브랜드 최저가격 조회 실패');
+        return response.json();
     }
 }; 
