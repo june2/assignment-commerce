@@ -137,4 +137,14 @@ const productAPI = {
         if (!response.ok) throw new Error('상품 조회 실패');
         return response.json();
     }
+};
+
+// 카테고리별 최저가격 조회 API
+const categoryAPI = {
+    // 카테고리별 최저가격 브랜드와 상품 가격, 총액 조회
+    getLowestByCategory: async () => {
+        const response = await fetch('/api/v1/prices/lowest-by-category');
+        if (!response.ok) throw new Error('카테고리별 최저가격 조회 실패');
+        return response.json();
+    }
 }; 
