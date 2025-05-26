@@ -3,6 +3,7 @@ package com.commerce.demo.application;
 import com.commerce.demo.domain.price.ProductPriceCalculator;
 import com.commerce.demo.domain.price.ProductWithBrand;
 import com.commerce.demo.domain.price.ProductWithBrandRepository;
+import com.commerce.demo.domain.price.CategorySortService;
 import com.commerce.demo.web.dto.CategoryLowestPriceAggregateResponse;
 import com.commerce.demo.web.dto.BrandLowestPriceAggregateResponse;
 import com.commerce.demo.web.dto.CategoryPriceRangeResponse;
@@ -17,6 +18,7 @@ import java.util.List;
 public class ProductWithBrandService {
 
   private final ProductWithBrandRepository productWithBrandRepository;
+  private final CategorySortService categorySortService;
 
   /**
    * 카테고리별 최저가 상품 조회 Use Case: 각 카테고리에서 가장 저렴한 상품들을 조회하고 총액과 함께 반환
@@ -25,10 +27,12 @@ public class ProductWithBrandService {
     ProductPriceCalculator productPriceCalculator = new ProductPriceCalculator();
     // 카테고리별 최저가 상품 조회
     List<ProductWithBrand> lowestProducts = productWithBrandRepository.findLowestPriceProductsByCategory();
+    // 카테고리 순서에 따라 정렬
+    List<ProductWithBrand> sortedProducts = categorySortService.sortByCategory(lowestProducts);
     // 총 가격 계산
-    long totalPrice = productPriceCalculator.calculateTotalPrice(lowestProducts);
+    long totalPrice = productPriceCalculator.calculateTotalPrice(sortedProducts);
 
-    return CategoryLowestPriceAggregateResponse.from(lowestProducts, totalPrice);
+    return CategoryLowestPriceAggregateResponse.from(sortedProducts, totalPrice);
   }
 
   /**
@@ -43,10 +47,12 @@ public class ProductWithBrandService {
       throw new IllegalStateException("상품 데이터가 존재하지 않습니다.");
     }
 
+    // 카테고리 순서에 따라 정렬
+    List<ProductWithBrand> sortedProducts = categorySortService.sortByCategory(lowestBrandProducts);
     // 총 가격 계산
-    long totalPrice = productPriceCalculator.calculateTotalPrice(lowestBrandProducts);
+    long totalPrice = productPriceCalculator.calculateTotalPrice(sortedProducts);
 
-    return BrandLowestPriceAggregateResponse.from(lowestBrandProducts, totalPrice);
+    return BrandLowestPriceAggregateResponse.from(sortedProducts, totalPrice);
   }
 
   /**
