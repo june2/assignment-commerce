@@ -1,5 +1,6 @@
 package com.commerce.demo.domain.price;
 
+import com.commerce.demo.domain.product.Category;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 
@@ -8,7 +9,7 @@ import lombok.AllArgsConstructor;
 public class ProductWithBrand {
 
   private Long id;
-  private String category;
+  private Category category;
   private String name;
   private Long price;
   private Long brandId;

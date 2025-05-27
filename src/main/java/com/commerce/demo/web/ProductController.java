@@ -3,6 +3,7 @@ package com.commerce.demo.web;
 import com.commerce.demo.application.ProductService;
 import com.commerce.demo.web.dto.ProductRequest;
 import com.commerce.demo.web.dto.ProductResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ProductController {
   private final ProductService productService;
 
   @PostMapping
-  public ResponseEntity<ProductResponse> create(@RequestBody ProductRequest request) {
+  public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
     ProductResponse response = productService.create(request);
     return ResponseEntity.ok(response);
   }
@@ -34,7 +35,7 @@ public class ProductController {
 
   @PutMapping("/{id}")
   public ResponseEntity<ProductResponse> update(@PathVariable Long id,
-      @RequestBody ProductRequest request) {
+      @Valid @RequestBody ProductRequest request) {
     return ResponseEntity.ok(productService.update(id, request));
   }
 

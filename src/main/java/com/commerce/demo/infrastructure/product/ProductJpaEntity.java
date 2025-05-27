@@ -1,6 +1,7 @@
 package com.commerce.demo.infrastructure.product;
 
 import com.commerce.demo.domain.product.Money;
+import com.commerce.demo.domain.product.Category;
 import com.commerce.demo.domain.brand.Brand;
 import jakarta.persistence.*;
 import com.commerce.demo.domain.product.Product;
@@ -22,7 +23,8 @@ public class ProductJpaEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String category;
+  @Enumerated(EnumType.STRING)
+  private Category category;
   private String name;
   private long price;
   private Long brandId;

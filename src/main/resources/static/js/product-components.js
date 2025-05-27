@@ -8,22 +8,57 @@ const ProductModal = ({ isOpen, onClose, onSave, product, mode, brandId, brandNa
         price: ''
     });
     const [loading, setLoading] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
 
+    // 카테고리 목록 로드
     useEffect(() => {
-        if (product && mode === 'edit') {
+        const loadCategories = async () => {
+            try {
+                setCategoriesLoading(true);
+                const categoryList = await categoryAPI.getCategories();
+                setCategories(categoryList);
+            } catch (error) {
+                console.error('카테고리 목록 로드 실패:', error);
+                alert('카테고리 목록을 불러오는데 실패했습니다.');
+            } finally {
+                setCategoriesLoading(false);
+            }
+        };
+
+        if (isOpen) {
+            loadCategories();
+        }
+    }, [isOpen]);
+
+    // 수정 모드일 때 기존 데이터로 폼 초기화 (카테고리 로딩 완료 후)
+    useEffect(() => {
+        if (mode === 'edit' && product && !categoriesLoading && categories.length > 0) {
+            // 기존 카테고리 값이 한국어 표시명인 경우 enum 값으로 변환
+            let categoryValue = product.category || '';
+            
+            // 카테고리 목록에서 매칭되는 값 찾기
+            const matchingCategory = categories.find(cat => 
+                cat.value === categoryValue || cat.label === categoryValue
+            );
+            
+            if (matchingCategory) {
+                categoryValue = matchingCategory.value;
+            }
+            
             setFormData({
-                name: product.name,
-                category: product.category,
-                price: product.price.toString()
+                name: product.name || '',
+                category: categoryValue,
+                price: product.price?.toString() || ''
             });
-        } else {
+        } else if (mode === 'create' || !product) {
             setFormData({
                 name: '',
                 category: '',
                 price: ''
             });
         }
-    }, [product, mode, isOpen]);
+    }, [mode, product, isOpen, categoriesLoading, categories]);
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
@@ -35,13 +70,18 @@ const ProductModal = ({ isOpen, onClose, onSave, product, mode, brandId, brandNa
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.name.trim() || !formData.category.trim() || !formData.price.trim()) {
-            alert('모든 필드를 입력해주세요.');
+        if (!formData.name.trim()) {
+            alert('상품명을 입력해주세요.');
             return;
         }
-
+        
+        if (!formData.category.trim()) {
+            alert('카테고리를 선택해주세요.');
+            return;
+        }
+        
         const price = parseInt(formData.price);
-        if (isNaN(price) || price <= 0) {
+        if (!price || price <= 0) {
             alert('올바른 가격을 입력해주세요.');
             return;
         }
@@ -122,14 +162,25 @@ const ProductModal = ({ isOpen, onClose, onSave, product, mode, brandId, brandNa
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             카테고리
                         </label>
-                        <input
-                            type="text"
-                            value={formData.category}
-                            onChange={(e) => handleInputChange('category', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="카테고리를 입력하세요 (예: 상의, 하의, 신발)"
-                            disabled={loading}
-                        />
+                        {categoriesLoading ? (
+                            <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                                카테고리 로딩 중...
+                            </div>
+                        ) : (
+                            <select
+                                value={formData.category}
+                                onChange={(e) => handleInputChange('category', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={loading}
+                            >
+                                <option value="">카테고리를 선택하세요</option>
+                                {categories.map((category) => (
+                                    <option key={category.value} value={category.value}>
+                                        {category.label}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">

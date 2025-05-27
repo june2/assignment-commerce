@@ -1,6 +1,7 @@
 package com.commerce.demo.infrastructure.product;
 
 import com.commerce.demo.domain.brand.Brand;
+import com.commerce.demo.domain.product.Category;
 import com.commerce.demo.domain.product.Money;
 import com.commerce.demo.domain.product.Product;
 import com.commerce.demo.infrastructure.brand.BrandJpaEntity;
@@ -49,7 +50,7 @@ class ProductRepositoryImplTest {
         brandJpaRepository.save(brandEntity);
         
         Brand brand = Brand.of(brandEntity.getId(), "Nike");
-        Product product = Product.create("상의", "티셔츠", new Money(10000), brand);
+        Product product = Product.create(Category.TOPS, "티셔츠", new Money(10000), brand);
         
         // when
         Product saved = productRepository.save(product);
@@ -59,7 +60,7 @@ class ProductRepositoryImplTest {
         assertThat(found).isPresent();
         Product foundProduct = found.get();
         assertThat(foundProduct.getName()).isEqualTo("티셔츠");
-        assertThat(foundProduct.getCategory()).isEqualTo("상의");
+        assertThat(foundProduct.getCategory()).isEqualTo(Category.TOPS);
         assertThat(foundProduct.getPrice().getValue()).isEqualTo(10000);
         assertThat(foundProduct.getBrand()).isNotNull();
         assertThat(foundProduct.getBrand().getId()).isEqualTo(brandEntity.getId());
@@ -74,8 +75,8 @@ class ProductRepositoryImplTest {
         brandJpaRepository.save(brandEntity);
         
         Brand brand = Brand.of(brandEntity.getId(), "Nike");
-        Product product1 = Product.create("상의", "티셔츠", new Money(10000), brand);
-        Product product2 = Product.create("하의", "바지", new Money(20000), brand);
+        Product product1 = Product.create(Category.TOPS, "티셔츠", new Money(10000), brand);
+        Product product2 = Product.create(Category.PANTS, "바지", new Money(20000), brand);
         
         productRepository.save(product1);
         productRepository.save(product2);
@@ -102,7 +103,7 @@ class ProductRepositoryImplTest {
         brandJpaRepository.save(brandEntity);
         
         Brand brand = Brand.of(brandEntity.getId(), "Nike");
-        Product product = Product.create("상의", "티셔츠", new Money(10000), brand);
+        Product product = Product.create(Category.TOPS, "티셔츠", new Money(10000), brand);
         Product saved = productRepository.save(product);
 
         // when

@@ -10,7 +10,7 @@ public record CategoryLowestPriceResponse(String category, String brandName, lon
    */
   public static CategoryLowestPriceResponse from(ProductWithBrand product) {
     return new CategoryLowestPriceResponse(
-        product.getCategory(),
+        product.getCategory().getDisplayName(),
         product.getBrandName(),
         product.getPrice()
     );

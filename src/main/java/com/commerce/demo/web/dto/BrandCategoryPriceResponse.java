@@ -10,7 +10,7 @@ public record BrandCategoryPriceResponse(String 카테고리, String 가격) {
    */
   public static BrandCategoryPriceResponse from(ProductWithBrand product) {
     return new BrandCategoryPriceResponse(
-        product.getCategory(),
+        product.getCategory().getDisplayName(),
         formatPrice(product.getPrice())
     );
   }

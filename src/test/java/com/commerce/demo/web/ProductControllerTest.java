@@ -3,6 +3,7 @@ package com.commerce.demo.web;
 import com.commerce.demo.application.ProductService;
 import com.commerce.demo.domain.exception.BrandNotFoundException;
 import com.commerce.demo.domain.exception.ProductNotFoundException;
+import com.commerce.demo.domain.product.Category;
 import com.commerce.demo.web.dto.ProductRequest;
 import com.commerce.demo.web.dto.ProductResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +37,7 @@ class ProductControllerTest {
   @DisplayName("상품 생성 성공")
   void createProduct_Success() throws Exception {
     // given
-    ProductRequest request = new ProductRequest("테스트 상품", "상의", 10000L, 1L);
+    ProductRequest request = new ProductRequest("테스트 상품", Category.TOPS, 10000L, 1L);
     ProductResponse response = new ProductResponse(1L, "테스트 상품", "상의", 10000L, 1L, "브랜드A");
 
     Mockito.when(productService.create(any())).thenReturn(response);
@@ -54,7 +55,7 @@ class ProductControllerTest {
   @DisplayName("상품 생성 실패 - 브랜드 없음")
   void createProduct_BrandNotFound() throws Exception {
     // given
-    ProductRequest request = new ProductRequest("테스트 상품", "상의", 10000L, 999L);
+    ProductRequest request = new ProductRequest("테스트 상품", Category.TOPS, 10000L, 999L);
     Mockito.when(productService.create(any())).thenThrow(new BrandNotFoundException(999L));
 
     // when & then
@@ -92,7 +93,7 @@ class ProductControllerTest {
   @DisplayName("상품 수정 성공")
   void updateProduct_Success() throws Exception {
     // given
-    ProductRequest request = new ProductRequest("수정된 상품", "상의", 15000L, 1L);
+    ProductRequest request = new ProductRequest("수정된 상품", Category.TOPS, 15000L, 1L);
     ProductResponse response = new ProductResponse(1L, "수정된 상품", "상의", 15000L, 1L, "브랜드A");
 
     Mockito.when(productService.update(eq(1L), any())).thenReturn(response);
@@ -109,7 +110,7 @@ class ProductControllerTest {
   @DisplayName("상품 수정 실패 - 상품 없음")
   void updateProduct_NotFound() throws Exception {
     // given
-    ProductRequest request = new ProductRequest("수정된 상품", "상의", 15000L, 1L);
+    ProductRequest request = new ProductRequest("수정된 상품", Category.TOPS, 15000L, 1L);
     Mockito.when(productService.update(eq(1L), any()))
         .thenThrow(new ProductNotFoundException(1L));
 

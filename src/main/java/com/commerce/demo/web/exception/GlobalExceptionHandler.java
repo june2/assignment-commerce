@@ -7,12 +7,28 @@ import com.commerce.demo.domain.exception.InvalidValueException;
 import com.commerce.demo.web.dto.ApiResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import java.util.stream.Collectors;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+  
+  /**
+   * Bean Validation 예외 처리 (400 Bad Request)
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResult<Void>> handleValidationException(MethodArgumentNotValidException ex) {
+    String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .collect(Collectors.joining(", "));
+    
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiResult.failure("입력값 검증 실패: " + errorMessage));
+  }
   
   /**
    * 엔티티를 찾을 수 없는 경우 (404 Not Found)

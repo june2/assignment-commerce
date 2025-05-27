@@ -11,18 +11,18 @@ import lombok.Getter;
 public class Product {
 
   private final Long id;
-  private final String category;
+  private final Category category;
   private final String name;
   private final Money price;
   private final Brand brand;
 
   // 새로운 상품 생성을 위한 팩토리 메소드 (ID 없음)
-  public static Product create(String category, String name, Money price, Brand brand) {
+  public static Product create(Category category, String name, Money price, Brand brand) {
     return new Product(null, category, name, price, brand);
   }
 
   // 기존 상품 재구성을 위한 팩토리 메소드 (ID 있음)
-  public static Product of(Long id, String category, String name, Money price, Brand brand) {
+  public static Product of(Long id, Category category, String name, Money price, Brand brand) {
     return new Product(id, category, name, price, brand);
   }
 

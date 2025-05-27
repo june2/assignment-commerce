@@ -3,6 +3,7 @@ package com.commerce.demo.web;
 import com.commerce.demo.application.BrandService;
 import com.commerce.demo.web.dto.BrandResponse;
 import com.commerce.demo.web.dto.CreateBrandRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class BrandController {
   private final BrandService brandService;
   
   @PostMapping
-  public ResponseEntity<BrandResponse> create(@RequestBody CreateBrandRequest request) {
+  public ResponseEntity<BrandResponse> create(@Valid @RequestBody CreateBrandRequest request) {
     BrandResponse response = brandService.create(request.name());
     return ResponseEntity.ok(response);
   }
@@ -34,7 +35,7 @@ public class BrandController {
   
   @PutMapping("/{id}")
   public ResponseEntity<BrandResponse> update(@PathVariable Long id,
-          @RequestBody CreateBrandRequest request) {
+          @Valid @RequestBody CreateBrandRequest request) {
     return ResponseEntity.ok(brandService.update(id, request.name()));
   }
   

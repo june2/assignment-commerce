@@ -1,6 +1,7 @@
 package com.commerce.demo.web.dto;
 
 import com.commerce.demo.domain.price.ProductWithBrand;
+import com.commerce.demo.domain.product.Category;
 import java.util.List;
 
 public record CategoryPriceRangeResponse(
@@ -12,7 +13,7 @@ public record CategoryPriceRangeResponse(
   /**
    * 카테고리명과 최저가/최고가 상품들로부터 CategoryPriceRangeResponse DTO를 생성 web layer에서 response mapping 변환시 사용
    */
-  public static CategoryPriceRangeResponse from(String category,
+  public static CategoryPriceRangeResponse from(Category category,
       List<ProductWithBrand> lowestProducts, List<ProductWithBrand> highestProducts) {
     List<BrandPriceResponse> 최저가 = lowestProducts.stream()
         .map(BrandPriceResponse::from)
@@ -22,6 +23,6 @@ public record CategoryPriceRangeResponse(
         .map(BrandPriceResponse::from)
         .toList();
 
-    return new CategoryPriceRangeResponse(category, 최저가, 최고가);
+    return new CategoryPriceRangeResponse(category.getDisplayName(), 최저가, 최고가);
   }
 }

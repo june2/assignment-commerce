@@ -6,6 +6,7 @@ import com.commerce.demo.domain.price.ProductWithBrand;
 import com.commerce.demo.domain.price.ProductWithBrandRepository;
 import com.commerce.demo.domain.price.ProductWithBrandRepository;
 import com.commerce.demo.domain.price.CategorySortService;
+import com.commerce.demo.domain.product.Category;
 import com.commerce.demo.web.dto.CategoryLowestPriceAggregateResponse;
 import com.commerce.demo.web.dto.BrandLowestPriceAggregateResponse;
 import com.commerce.demo.web.dto.CategoryPriceRangeResponse;
@@ -60,7 +61,7 @@ public class ProductWithBrandService {
   /**
    * 카테고리별 최저가, 최고가 브랜드 조회 Use Case: 특정 카테고리에서 최저가와 최고가 브랜드의 상품 가격을 조회
    */
-  public CategoryPriceRangeResponse findCategoryPriceRange(String category) {
+  public CategoryPriceRangeResponse findCategoryPriceRange(Category category) {
     // 해당 카테고리의 최저가 상품들 조회
     List<ProductWithBrand> lowestProducts = productWithBrandRepository.findLowestPriceProductsInCategory(
         category);
@@ -70,7 +71,7 @@ public class ProductWithBrandService {
         category);
 
     if (lowestProducts.isEmpty() || highestProducts.isEmpty()) {
-      throw ProductDataNotFoundException.forCategory(category);
+      throw ProductDataNotFoundException.forCategory(category.getDisplayName());
     }
 
     return CategoryPriceRangeResponse.from(category, lowestProducts, highestProducts);
