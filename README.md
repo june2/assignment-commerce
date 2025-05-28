@@ -1,7 +1,6 @@
 # 커머스 API 요약
 
-**🔗 [프론트엔드 구현 화면 확인하기](https://drive.google.com/file/d/
-12Or9nECkyaCwqPLYEB7cOuGi4dn5Tte_/view?usp=sharing)**
+**🔗 [프론트엔드 구현 화면 확인하기](https://drive.google.com/file/d/12Or9nECkyaCwqPLYEB7cOuGi4dn5Tte_/view?usp=sharing)**
 
 ## 주요 기능
 - **카테고리별 최저가 브랜드 조회**  
