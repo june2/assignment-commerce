@@ -20,24 +20,16 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
   @Override
   public List<ProductWithBrand> findLowestPriceProductsByCategory() {
     String sql = """
-        WITH category_min_prices AS (
-          SELECT category, MIN(price) as min_price
-          FROM product
-          GROUP BY category
-        ),
-        category_lowest_brand AS (
-          SELECT p.category, MAX(b.name) as first_brand_name
+        WITH ranked_products AS (
+          SELECT p.category, p.brand_id, p.price, b.name as brand_name,
+                 ROW_NUMBER() OVER (PARTITION BY p.category ORDER BY p.price ASC) as rn
           FROM product p
           INNER JOIN brand b ON p.brand_id = b.id
-          INNER JOIN category_min_prices cmp ON p.category = cmp.category AND p.price = cmp.min_price
-          GROUP BY p.category
         )
-        SELECT p.id, p.category, p.name, p.price, p.brand_id, b.name as brand_name
-        FROM product p
-        INNER JOIN brand b ON p.brand_id = b.id
-        INNER JOIN category_min_prices cmp ON p.category = cmp.category AND p.price = cmp.min_price
-        INNER JOIN category_lowest_brand clb ON p.category = clb.category AND b.name = clb.first_brand_name
-        ORDER BY p.category
+        SELECT category, brand_name, price
+        FROM ranked_products
+        WHERE rn = 1
+        ORDER BY price DESC
         """;
 
     Query query = entityManager.createNativeQuery(sql);
@@ -45,12 +37,12 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
 
     return results.stream()
         .map(row -> new ProductWithBrand(
-            ((Number) row[0]).longValue(),
-            Category.valueOf((String) row[1]),
-            (String) row[2],
-            ((Number) row[3]).longValue(),
-            ((Number) row[4]).longValue(),
-            (String) row[5]
+            null, // id 없음
+            Category.valueOf((String) row[0]),
+            null, // name 없음
+            ((Number) row[2]).longValue(),
+            null, // brandId 없음
+            (String) row[1]
         ))
         .collect(Collectors.toList());
   }
@@ -58,36 +50,21 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
   @Override
   public List<ProductWithBrand> findLowestTotalPriceBrandProducts() {
     String sql = """
-        WITH brand_category_min AS (
-          SELECT brand_id, category, MIN(price) as min_price
+        WITH brand_totals AS (
+          SELECT brand_id, SUM(price) as total_price, COUNT(DISTINCT category) as category_count
           FROM product
-          GROUP BY brand_id, category
-        ),
-        brand_totals AS (
-          SELECT brand_id, SUM(min_price) as total_price
-          FROM brand_category_min
-          WHERE brand_id IN (
-            SELECT brand_id
-            FROM brand_category_min
-            GROUP BY brand_id
-            HAVING COUNT(DISTINCT category) = (SELECT COUNT(DISTINCT category) FROM product)
-          )
           GROUP BY brand_id
-        ),
-        min_total AS (
+        ), min_total AS (
           SELECT MIN(total_price) as min_total_price
           FROM brand_totals
+          WHERE category_count = (SELECT COUNT(DISTINCT category) FROM product)
         )
         SELECT p.id, p.category, p.name, p.price, p.brand_id, b.name as brand_name
         FROM product p
         INNER JOIN brand b ON p.brand_id = b.id
         INNER JOIN brand_totals bt ON p.brand_id = bt.brand_id
         INNER JOIN min_total mt ON bt.total_price = mt.min_total_price
-        WHERE (p.brand_id, p.category, p.price) IN (
-          SELECT brand_id, category, MIN(price)
-          FROM product
-          GROUP BY brand_id, category
-        )
+        WHERE bt.category_count = (SELECT COUNT(DISTINCT category) FROM product)
         ORDER BY p.category, p.name
         """;
 
@@ -112,7 +89,7 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
         SELECT p.id, p.category, p.name, p.price, p.brand_id, b.name as brand_name
         FROM product p
         INNER JOIN brand b ON p.brand_id = b.id
-        WHERE p.category = :category 
+        WHERE p.category = :category
         AND p.price = (SELECT MIN(price) FROM product WHERE category = :category)
         ORDER BY b.name
         """;
@@ -139,7 +116,7 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
         SELECT p.id, p.category, p.name, p.price, p.brand_id, b.name as brand_name
         FROM product p
         INNER JOIN brand b ON p.brand_id = b.id
-        WHERE p.category = :category 
+        WHERE p.category = :category
         AND p.price = (SELECT MAX(price) FROM product WHERE category = :category)
         ORDER BY b.name
         """;
@@ -159,4 +136,4 @@ public class ProductWithBrandRepositoryImpl implements ProductWithBrandRepositor
         ))
         .collect(Collectors.toList());
   }
-} 
+}
