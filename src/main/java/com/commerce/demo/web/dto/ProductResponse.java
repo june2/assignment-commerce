@@ -3,7 +3,8 @@ package com.commerce.demo.web.dto;
 import com.commerce.demo.domain.product.Product;
 import com.commerce.demo.domain.product.Category;
 
-public record ProductResponse(Long id, String name, String category, long price, Long brandId, String brandName) {
+public record ProductResponse(Long id, String name, String category, long price, Long brandId,
+                              String brandName) {
   
   public static ProductResponse from(Product product) {
     return new ProductResponse(
@@ -15,4 +16,4 @@ public record ProductResponse(Long id, String name, String category, long price,
             product.getBrand() != null ? product.getBrand().getName() : null
     );
   }
-} 
+}

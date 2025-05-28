@@ -44,4 +44,4 @@ public class BrandController {
     brandService.delete(id);
     return ResponseEntity.ok().build();
   }
-} 
+}

@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.stream.Collectors;
 
@@ -21,7 +20,8 @@ public class GlobalExceptionHandler {
    * Bean Validation 예외 처리 (400 Bad Request)
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResult<Void>> handleValidationException(MethodArgumentNotValidException ex) {
+  public ResponseEntity<ApiResult<Void>> handleValidationException(
+          MethodArgumentNotValidException ex) {
     String errorMessage = ex.getBindingResult().getFieldErrors().stream()
             .map(error -> error.getField() + ": " + error.getDefaultMessage())
             .collect(Collectors.joining(", "));
